@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -20,7 +20,7 @@ namespace OpenXmlPowerTools
 
         public static List<WmlComparerRevision> GetRevisions(WmlDocument source, WmlComparerSettings settings)
         {
-            using (var ms = new MemoryStream())
+            using (var ms = MemoryStreamManager.GetStream())
             {
                 ms.Write(source.DocumentByteArray, 0, source.DocumentByteArray.Length);
                 using (WordprocessingDocument wDoc = WordprocessingDocument.Open(ms, true))

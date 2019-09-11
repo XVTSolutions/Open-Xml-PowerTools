@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -17,7 +17,7 @@ namespace OpenXmlPowerTools
         private static WmlDocument PreProcessMarkup(WmlDocument source, int startingIdForFootnotesEndnotes)
         {
             // open and close to get rid of MC content
-            using (var ms = new MemoryStream())
+            using (var ms = MemoryStreamManager.GetStream())
             {
                 ms.Write(source.DocumentByteArray, 0, source.DocumentByteArray.Length);
                 var os = new OpenSettings
@@ -47,7 +47,7 @@ namespace OpenXmlPowerTools
             }
 
             // open and close to get rid of MC content
-            using (var ms = new MemoryStream())
+            using (var ms = MemoryStreamManager.GetStream())
             {
                 ms.Write(source.DocumentByteArray, 0, source.DocumentByteArray.Length);
                 var os = new OpenSettings

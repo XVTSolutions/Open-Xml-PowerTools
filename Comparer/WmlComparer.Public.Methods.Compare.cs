@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.IO;
@@ -130,7 +130,7 @@ namespace OpenXmlPowerTools
             // correlatedSHA1Hash codes, this is as it should be.
             // but need to go back in and add guids to paragraphs that have had them removed.
 
-            using (var ms = new MemoryStream())
+            using (var ms = MemoryStreamManager.GetStream())
             {
                 ms.Write(source2.DocumentByteArray, 0, source2.DocumentByteArray.Length);
                 using (WordprocessingDocument wDoc = WordprocessingDocument.Open(ms, true))
@@ -140,8 +140,8 @@ namespace OpenXmlPowerTools
             }
 
             var wmlResult = new WmlDocument(source1);
-            using (var ms1 = new MemoryStream())
-            using (var ms2 = new MemoryStream())
+            using (var ms1 = MemoryStreamManager.GetStream())
+            using (var ms2 = MemoryStreamManager.GetStream())
             {
                 ms1.Write(source1.DocumentByteArray, 0, source1.DocumentByteArray.Length);
                 ms2.Write(source2.DocumentByteArray, 0, source2.DocumentByteArray.Length);
@@ -192,7 +192,7 @@ namespace OpenXmlPowerTools
 
         private static WmlDocument CleanPowerToolsAndRsid(WmlDocument producedDocument)
         {
-            using (var ms = new MemoryStream())
+            using (var ms = MemoryStreamManager.GetStream())
             {
                 ms.Write(producedDocument.DocumentByteArray, 0, producedDocument.DocumentByteArray.Length);
                 using (WordprocessingDocument wDoc = WordprocessingDocument.Open(ms, true))

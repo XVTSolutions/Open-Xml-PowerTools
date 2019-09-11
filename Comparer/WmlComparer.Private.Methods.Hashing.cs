@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
+// Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -17,58 +17,60 @@ namespace OpenXmlPowerTools
             WmlDocument sourceAfterProc,
             WmlComparerSettings settings)
         {
-            using (var msSource = new MemoryStream())
-            using (var msAfterProc = new MemoryStream())
+            using (var msSource = MemoryStreamManager.GetStream())
             {
-                msSource.Write(source.DocumentByteArray, 0, source.DocumentByteArray.Length);
-                msAfterProc.Write(sourceAfterProc.DocumentByteArray, 0, sourceAfterProc.DocumentByteArray.Length);
-
-                using (WordprocessingDocument wDocSource = WordprocessingDocument.Open(msSource, true))
-                using (WordprocessingDocument wDocAfterProc = WordprocessingDocument.Open(msAfterProc, true))
+                using (var msAfterProc = MemoryStreamManager.GetStream())
                 {
-                    // create Unid dictionary for source
-                    XDocument sourceMainXDoc = wDocSource.MainDocumentPart.GetXDocument();
-                    XElement sourceMainRoot = sourceMainXDoc.Root ?? throw new ArgumentException();
-                    Dictionary<string, XElement> sourceUnidDict = sourceMainRoot
-                        .Descendants()
-                        .Where(d => d.Name == W.p || d.Name == W.tbl || d.Name == W.tr)
-                        .ToDictionary(d => (string) d.Attribute(PtOpenXml.Unid));
+                    msSource.Write(source.DocumentByteArray, 0, source.DocumentByteArray.Length);
+                    msAfterProc.Write(sourceAfterProc.DocumentByteArray, 0, sourceAfterProc.DocumentByteArray.Length);
 
-                    XDocument afterProcMainXDoc = wDocAfterProc.MainDocumentPart.GetXDocument();
-                    XElement afterProcMainRoot = afterProcMainXDoc.Root ?? throw new ArgumentException();
-                    IEnumerable<XElement> blockLevelElements = afterProcMainRoot
-                        .Descendants()
-                        .Where(d => d.Name == W.p || d.Name == W.tbl || d.Name == W.tr);
-
-                    foreach (XElement blockLevelContent in blockLevelElements)
+                    using (WordprocessingDocument wDocSource = WordprocessingDocument.Open(msSource, true))
+                    using (WordprocessingDocument wDocAfterProc = WordprocessingDocument.Open(msAfterProc, true))
                     {
-                        var cloneBlockLevelContentForHashing = (XElement) CloneBlockLevelContentForHashing(
-                            wDocAfterProc.MainDocumentPart,
-                            blockLevelContent,
-                            true,
-                            settings);
+                        // create Unid dictionary for source
+                        XDocument sourceMainXDoc = wDocSource.MainDocumentPart.GetXDocument();
+                        XElement sourceMainRoot = sourceMainXDoc.Root ?? throw new ArgumentException();
+                        Dictionary<string, XElement> sourceUnidDict = sourceMainRoot
+                            .Descendants()
+                            .Where(d => d.Name == W.p || d.Name == W.tbl || d.Name == W.tr)
+                            .ToDictionary(d => (string) d.Attribute(PtOpenXml.Unid));
 
-                        string shaString = cloneBlockLevelContentForHashing
-                            .ToString(SaveOptions.DisableFormatting)
-                            .Replace(" xmlns=\"http://schemas.openxmlformats.org/wordprocessingml/2006/main\"", "");
+                        XDocument afterProcMainXDoc = wDocAfterProc.MainDocumentPart.GetXDocument();
+                        XElement afterProcMainRoot = afterProcMainXDoc.Root ?? throw new ArgumentException();
+                        IEnumerable<XElement> blockLevelElements = afterProcMainRoot
+                            .Descendants()
+                            .Where(d => d.Name == W.p || d.Name == W.tbl || d.Name == W.tr);
 
-                        string sha1Hash = WmlComparerUtil.SHA1HashStringForUTF8String(shaString);
-                        var thisUnid = (string) blockLevelContent.Attribute(PtOpenXml.Unid);
-                        if (thisUnid != null)
+                        foreach (XElement blockLevelContent in blockLevelElements)
                         {
-                            if (sourceUnidDict.ContainsKey(thisUnid))
+                            var cloneBlockLevelContentForHashing = (XElement) CloneBlockLevelContentForHashing(
+                                wDocAfterProc.MainDocumentPart,
+                                blockLevelContent,
+                                true,
+                                settings);
+
+                            string shaString = cloneBlockLevelContentForHashing
+                                .ToString(SaveOptions.DisableFormatting)
+                                .Replace(" xmlns=\"http://schemas.openxmlformats.org/wordprocessingml/2006/main\"", "");
+
+                            string sha1Hash = WmlComparerUtil.SHA1HashStringForUTF8String(shaString);
+                            var thisUnid = (string) blockLevelContent.Attribute(PtOpenXml.Unid);
+                            if (thisUnid != null)
                             {
-                                XElement correlatedBlockLevelContent = sourceUnidDict[thisUnid];
-                                correlatedBlockLevelContent.Add(new XAttribute(PtOpenXml.CorrelatedSHA1Hash, sha1Hash));
+                                if (sourceUnidDict.ContainsKey(thisUnid))
+                                {
+                                    XElement correlatedBlockLevelContent = sourceUnidDict[thisUnid];
+                                    correlatedBlockLevelContent.Add(new XAttribute(PtOpenXml.CorrelatedSHA1Hash, sha1Hash));
+                                }
                             }
                         }
+
+                        wDocSource.MainDocumentPart.PutXDocument();
                     }
 
-                    wDocSource.MainDocumentPart.PutXDocument();
+                    var sourceWithCorrelatedSHA1Hash = new WmlDocument(source.FileName, msSource.ToArray());
+                    return sourceWithCorrelatedSHA1Hash;
                 }
-
-                var sourceWithCorrelatedSHA1Hash = new WmlDocument(source.FileName, msSource.ToArray());
-                return sourceWithCorrelatedSHA1Hash;
             }
         }
 
