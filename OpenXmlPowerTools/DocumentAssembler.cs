@@ -853,18 +853,5 @@ namespace OpenXmlPowerTools
             return xPathSelectResult.ToString();
 
         }
-
-        private static XAttribute GetXmlSpaceAttribute(string textOfTextElement)
-        {
-            if (!string.IsNullOrEmpty(textOfTextElement))
-            {
-                if (char.IsWhiteSpace(textOfTextElement[0]) ||
-                    char.IsWhiteSpace(textOfTextElement[textOfTextElement.Length - 1]))
-                {
-                    return new XAttribute(XNamespace.Xml + "space", "preserve");
-                }
-            }
-            return null;
-        }
     }
 }

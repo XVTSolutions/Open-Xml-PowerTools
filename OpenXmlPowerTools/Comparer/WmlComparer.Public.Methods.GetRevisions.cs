@@ -20,7 +20,7 @@ namespace OpenXmlPowerTools
 
         public static List<WmlComparerRevision> GetRevisions(WmlDocument source, WmlComparerSettings settings)
         {
-            using (var ms = new MemoryStream())
+            using (var ms = MemoryStreamManager.GetStream())
             {
                 ms.Write(source.DocumentByteArray, 0, source.DocumentByteArray.Length);
                 using (WordprocessingDocument wDoc = WordprocessingDocument.Open(ms, true))

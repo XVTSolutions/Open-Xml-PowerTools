@@ -52,6 +52,7 @@ using System.Linq;
 using System.Xml.Linq;
 using System.IO.Packaging;
 using DocumentFormat.OpenXml.Packaging;
+using Microsoft.IO;
 
 namespace OpenXmlPowerTools
 {
@@ -249,8 +250,7 @@ namespace OpenXmlPowerTools
         public OpenXmlPowerToolsDocument(string fileName, MemoryStream memStream)
         {
             FileName = fileName;
-            DocumentByteArray = new byte[memStream.Length];
-            Array.Copy(memStream.GetBuffer(), DocumentByteArray, memStream.Length);
+            DocumentByteArray = memStream.ToArray();
         }
 
         public OpenXmlPowerToolsDocument(string fileName, MemoryStream memStream, bool convertToTransitional)
@@ -520,6 +520,8 @@ namespace OpenXmlPowerTools
 
     public class OpenXmlMemoryStreamDocument : IDisposable
     {
+        private static RecyclableMemoryStreamManager memoryStreamManager = new RecyclableMemoryStreamManager();
+
         private OpenXmlPowerToolsDocument Document;
         private MemoryStream DocMemoryStream;
         private Package DocPackage;
@@ -527,7 +529,7 @@ namespace OpenXmlPowerTools
         public OpenXmlMemoryStreamDocument(OpenXmlPowerToolsDocument doc)
         {
             Document = doc;
-            DocMemoryStream = new MemoryStream();
+            DocMemoryStream = memoryStreamManager.GetStream();
             DocMemoryStream.Write(doc.DocumentByteArray, 0, doc.DocumentByteArray.Length);
             try
             {
@@ -554,7 +556,7 @@ namespace OpenXmlPowerTools
 
         public static OpenXmlMemoryStreamDocument CreateWordprocessingDocument()
         {
-            MemoryStream stream = new MemoryStream();
+            MemoryStream stream = memoryStreamManager.GetStream();
             using (WordprocessingDocument doc = WordprocessingDocument.Create(stream, DocumentFormat.OpenXml.WordprocessingDocumentType.Document))
             {
                 doc.AddMainDocumentPart();
@@ -569,7 +571,7 @@ namespace OpenXmlPowerTools
         }
         public static OpenXmlMemoryStreamDocument CreateSpreadsheetDocument()
         {
-            MemoryStream stream = new MemoryStream();
+            MemoryStream stream = memoryStreamManager.GetStream();
             using (SpreadsheetDocument doc = SpreadsheetDocument.Create(stream, DocumentFormat.OpenXml.SpreadsheetDocumentType.Workbook))
             {
                 doc.AddWorkbookPart();
@@ -586,7 +588,7 @@ namespace OpenXmlPowerTools
         }
         public static OpenXmlMemoryStreamDocument CreatePresentationDocument()
         {
-            MemoryStream stream = new MemoryStream();
+            MemoryStream stream = memoryStreamManager.GetStream();
             using (PresentationDocument doc = PresentationDocument.Create(stream, DocumentFormat.OpenXml.PresentationDocumentType.Presentation))
             {
                 doc.AddPresentationPart();
@@ -608,7 +610,7 @@ namespace OpenXmlPowerTools
 
         public static OpenXmlMemoryStreamDocument CreatePackage()
         {
-            MemoryStream stream = new MemoryStream();
+            MemoryStream stream = memoryStreamManager.GetStream();
             Package package = Package.Open(stream, FileMode.Create);
             package.Close();
             return new OpenXmlMemoryStreamDocument(stream);
@@ -738,17 +740,15 @@ namespace OpenXmlPowerTools
         {
             if (disposing)
             {
-                if (DocPackage != null)
-                {
-                    DocPackage.Close();
-                }
-                if (DocMemoryStream != null)
-                {
-                    DocMemoryStream.Dispose();
-                }
+                DocPackage?.Close();
+
+                DocMemoryStream?.Dispose();
             }
             if (DocPackage == null && DocMemoryStream == null)
+            {
                 return;
+            }
+
             DocPackage = null;
             DocMemoryStream = null;
             GC.SuppressFinalize(this);

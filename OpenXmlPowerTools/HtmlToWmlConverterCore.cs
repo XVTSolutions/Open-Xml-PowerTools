@@ -974,22 +974,21 @@ namespace OpenXmlPowerTools.HtmlToWml
                             string width = computedProperties["width"];
                             if (width != "auto")
                                 run.Add(new XAttribute(PtOpenXml.HtmlToWmlCssWidth, width));
-                            var rFontsLocal = run.Element(W.rFonts);
                             XElement rFontsGlobal = null;
                             var styleDefPart = wDoc.MainDocumentPart.StyleDefinitionsPart;
                             if (styleDefPart != null)
                             {
                                 rFontsGlobal = styleDefPart.GetXDocument().Root.Elements(W.docDefaults).Elements(W.rPrDefault).Elements(W.rPr).Elements(W.rFonts).FirstOrDefault();
                             }
-                            var rFontsNew = FontMerge(rFontsLocal, rFontsGlobal);
                             var rPr = run.Element(W.rPr);
+                            var rFontsLocal = rPr?.Element(W.rFonts);
+                            var rFontsNew = FontMerge(rFontsLocal, rFontsGlobal);
                             if (rPr != null)
                             {
-                                var rFontsExisting = rPr.Element(W.rFonts);
-                                if (rFontsExisting == null)
-                                    rPr.AddFirst(rFontsGlobal);
+                                if (rFontsLocal == null)
+                                    rPr.AddFirst(rFontsNew);
                                 else
-                                    rFontsExisting.ReplaceWith(rFontsGlobal);
+                                    rFontsLocal.ReplaceWith(rFontsNew);
                             }
                         }
                         return dummyElement.Elements();
