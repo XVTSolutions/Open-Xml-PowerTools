@@ -18,6 +18,7 @@ namespace OpenXmlPowerTools
             WmlComparerSettings settings)
         {
             using (var msSource = new MemoryStream())
+            {
             using (var msAfterProc = new MemoryStream())
             {
                 msSource.Write(source.DocumentByteArray, 0, source.DocumentByteArray.Length);
@@ -69,6 +70,7 @@ namespace OpenXmlPowerTools
 
                 var sourceWithCorrelatedSHA1Hash = new WmlDocument(source.FileName, msSource.ToArray());
                 return sourceWithCorrelatedSHA1Hash;
+                }
             }
         }
 

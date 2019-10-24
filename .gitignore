@@ -36,7 +36,9 @@ TestResults/
 
 # Visual Studio
 .vs/
+.vscode/
 
 # JetBrains
 .idea/
 _ReSharper.Caches/
+*.orig

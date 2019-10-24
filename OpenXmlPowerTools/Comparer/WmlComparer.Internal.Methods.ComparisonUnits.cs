@@ -7,9 +7,15 @@ using System.Linq;
 using System.Text;
 using System.Xml.Linq;
 using DocumentFormat.OpenXml.Packaging;
+using Microsoft.IO;
 
 namespace OpenXmlPowerTools
 {
+    public static partial class WmlComparer
+    {
+        private static RecyclableMemoryStreamManager MemoryStreamManager = new RecyclableMemoryStreamManager();
+    }
+
     public static partial class WmlComparer
     {
         #region CreateComparisonUnitAtomList

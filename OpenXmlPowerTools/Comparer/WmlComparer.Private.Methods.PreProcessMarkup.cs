@@ -17,7 +17,7 @@ namespace OpenXmlPowerTools
         private static WmlDocument PreProcessMarkup(WmlDocument source, int startingIdForFootnotesEndnotes)
         {
             // open and close to get rid of MC content
-            using (var ms = new MemoryStream())
+            using (var ms = MemoryStreamManager.GetStream())
             {
                 ms.Write(source.DocumentByteArray, 0, source.DocumentByteArray.Length);
                 var os = new OpenSettings
@@ -47,7 +47,7 @@ namespace OpenXmlPowerTools
             }
 
             // open and close to get rid of MC content
-            using (var ms = new MemoryStream())
+            using (var ms = MemoryStreamManager.GetStream())
             {
                 ms.Write(source.DocumentByteArray, 0, source.DocumentByteArray.Length);
                 var os = new OpenSettings

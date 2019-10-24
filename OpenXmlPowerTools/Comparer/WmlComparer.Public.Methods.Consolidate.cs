@@ -62,7 +62,7 @@ namespace OpenXmlPowerTools
 
             int revisedDocumentInfoListCount = revisedDocumentInfoList.Count();
 
-            using (var consolidatedMs = new MemoryStream())
+            using (var consolidatedMs = MemoryStreamManager.GetStream())
             {
                 consolidatedMs.Write(consolidated.DocumentByteArray, 0, consolidated.DocumentByteArray.Length);
                 using (WordprocessingDocument consolidatedWDoc = WordprocessingDocument.Open(consolidatedMs, true))
@@ -101,8 +101,8 @@ namespace OpenXmlPowerTools
                             delta.SaveAs(deltaFi.FullName);
                         }
 
-                        using (var msOriginalWithUnids = new MemoryStream())
-                        using (var msDelta = new MemoryStream())
+                        using (var msOriginalWithUnids = MemoryStreamManager.GetStream())
+                        using (var msDelta = MemoryStreamManager.GetStream())
                         {
                             msOriginalWithUnids.Write(
                                 originalWithUnids.DocumentByteArray,

@@ -147,7 +147,7 @@ namespace OpenXmlPowerTools
             }
 
             // and then finally can generate the document with revisions
-            using (var ms = new MemoryStream())
+            using (var ms = MemoryStreamManager.GetStream())
             {
                 ms.Write(wmlResult.DocumentByteArray, 0, wmlResult.DocumentByteArray.Length);
                 using (WordprocessingDocument wDocWithRevisions = WordprocessingDocument.Open(ms, true))
