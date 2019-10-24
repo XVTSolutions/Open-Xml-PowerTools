@@ -623,7 +623,7 @@ namespace OpenXmlPowerTools
                             p.Add(new XElement(W.r,
                                     para.Elements(W.r).Elements(W.rPr).FirstOrDefault(),
                                 (p.Elements().Count() > 1) ? new XElement(W.br) : null,
-                                new XElement(W.t, GetXmlSpaceAttribute(line), line)));
+                                new XElement(W.t, line)));
                         }
                         return p;
                     }
@@ -635,7 +635,7 @@ namespace OpenXmlPowerTools
                             list.Add(new XElement(W.r,
                                 run.Elements().Where(e => e.Name != W.t),
                                 (list.Count > 0) ? new XElement(W.br) : null,
-                                new XElement(W.t, GetXmlSpaceAttribute(line), line)));
+                                new XElement(W.t, line)));
                         }
                         return list;
                     }
